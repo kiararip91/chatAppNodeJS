@@ -1,3 +1,4 @@
+/* eslint-disable no-undef */
 const socket = io()
 
 socket.on('welcome', (message) => {
@@ -11,7 +12,7 @@ socket.on('message', (message) => {
 
 document.querySelector('#btn').addEventListener('click', (event) => {
     event.preventDefault();
-    let clientMessage = document.getElementsByName('message')[0].value
+    const clientMessage = document.getElementsByName('message')[0].value
     socket.emit('newMessage', clientMessage)
     })
 
