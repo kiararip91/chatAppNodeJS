@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<head>
+    <title>Chat app</title>
+    <!--<link rel="stylesheet" href="/css/style.css">-->
+</head>
+<body>
+    <div class="main-content">
+        {{>header}}
+        <p>This is some random text</p>
+        <form>
+            <div>Insert your message here</div>
+            <input name="message"/>
+            <button id="btn">Submit</button>
+        </form>
+        <button id="increment">+1</button>
+    </div>
+    
+    {{>footer}}
+
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="/js/chat.js"></script>
+</body>
+</htmL>
