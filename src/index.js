@@ -23,6 +23,7 @@ io.on('connection', (socket) => {
     // Manda il mess a tutti tranne alla socket connessa
     socket.broadcast.emit('message', generateMessage('A new User has joined'))
 
+    // eslint-disable-next-line consistent-return
     socket.on('newMessage', (message, callback) => {
         const filter = new Filter()
 

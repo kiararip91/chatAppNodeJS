@@ -1,3 +1,4 @@
+/* eslint-disable consistent-return */
 /* eslint-disable no-undef */
 const socket = io()
 const $messageForm = document.querySelector('#message-form')
@@ -7,7 +8,7 @@ const $locationButton = document.querySelector('#location')
 const $messages = document.querySelector('#messages')
 
 // Change Default Mustache Tags to avoid conflicts with handlebars
-Mustache.tags = ["[[", "]]"];
+Mustache.tags = ['[[', ']]'];
 
 // Templates
 const messageTemplate = document.querySelector('#message-template').innerHTML
