@@ -9,6 +9,13 @@ const {
     generateLocationMessage
 } = require('./utils/messages')
 
+const {
+    addUser,
+    getUser,
+    getUsersInRoom,
+    removeUser
+} = require('./utils/users')
+
 const port = process.env.PORT
 
 //let count = 0
@@ -17,31 +24,62 @@ const port = process.env.PORT
 // client emit --> server receive (increment)
 
 io.on('connection', (socket) => {
-    console.log('New web socket connection')
-    // Manda il mess solo alla socket
-    socket.emit('welcome', generateMessage('Welcome!'))
-    // Manda il mess a tutti tranne alla socket connessa
-    socket.broadcast.emit('message', generateMessage('A new User has joined'))
+    socket.on('join', ({ username, room }, callback) => {
+         
+         const { error, user } = addUser({ id: socket.id, username, room })
+         
+         if (error) {
+            return callback(error)
+         }
+
+         socket.join(user.room) //definisce una room
+         //socket.to.emit --> manda il messaggio a una specifica room
+        // Manda il mess solo alla socket
+        socket.emit('welcome', generateMessage('Admin', 'Welcome!'))
+        // Manda il mess a tutti (nella room) tranne alla socket connessa
+        socket.broadcast.to(user.room).emit('message', generateMessage('Admin', `${user.username} has joined`))
+        io.to(user.room).emit('roomData', {
+            room: user.room,
+            users: getUsersInRoom(user.room)
+        })
+
+        callback()
+    })
 
     // eslint-disable-next-line consistent-return
     socket.on('newMessage', (message, callback) => {
         const filter = new Filter()
 
+        const user = getUser(socket.id)
+
+        if (!user) {
+            return callback('Invaid user')
+        }
+
         if (filter.isProfane(message)) {
             return callback('Profanity in not allowed')
         }
-        // Manda il mess a tutti
-        io.emit('message', generateMessage(message))
+        // Manda il mess a tutti gli utenti della room
+        io.to(user.room).emit('message', generateMessage(user.username, message))
         callback()
     })
 
     socket.on('share-location', (location, callback) => {
-        io.emit('location', generateLocationMessage(`https://google.com/maps?q=${location.latitude},${location.longitude}`))
+        const user = getUser(socket.id)
+        io.to(user.room).emit('location', generateLocationMessage(user.username, `https://google.com/maps?q=${location.latitude},${location.longitude}`))
         callback()
     })
 
     socket.on('disconnect', () => {
-        io.emit('message', generateMessage('A user has left'))
+        const user = removeUser(socket.id)
+
+        if (user) {
+            io.to(user.room).emit('message', generateMessage('Admin', `${user.username} has left!`))
+            io.to(user.room).emit('roomData', {
+                room: user.room,
+                users: getUsersInRoom(user.room)
+            })
+        }
     })
     //socket.emit('countUpdated', count)
 
